@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
-// Configuration de Firebase en utilisant nos variables secrètes
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -11,10 +11,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialiser Firebase pour notre application
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-
-// Créer la connexion à la base de données (Firestore)
 const db = getFirestore(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-export { app, db };
+export { app, db, auth, googleProvider };
