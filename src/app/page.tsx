@@ -6,24 +6,26 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import AuthForm from '@/components/auth/AuthForm';
 import FactionSelection from '@/components/onboarding/FactionSelection';
+import CharacterSelection from '@/components/onboarding/CharacterSelection'; // 1. On importe le nouveau composant
 import Footer from '@/components/layout/Footer';
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState('');
-  // Nouvelle variable d'état pour retenir la faction
   const [faction, setFaction] = useState<string | null>(null);
+  // 2. Nouvelle variable d'état pour retenir le sexe du personnage
+  const [gender, setGender] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // On isole la récupération des données pour pouvoir la rappeler facilement
   const fetchUserData = async (uid: string) => {
     const docRef = doc(db, 'users', uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
       setUsername(data.username);
-      // On récupère la faction si elle existe, sinon ça reste null
       setFaction(data.faction || null);
+      // 3. On récupère le sexe s'il existe dans Firestore
+      setGender(data.gender || null);
     }
   };
 
@@ -35,6 +37,7 @@ export default function Home() {
       } else {
         setUsername('');
         setFaction(null);
+        setGender(null); // On réinitialise aussi le genre à la déconnexion
       }
       setLoading(false);
     });
@@ -72,8 +75,14 @@ export default function Home() {
             uid={user.uid}
             onComplete={() => fetchUserData(user.uid)}
           />
+        ) : !gender ? (
+          /* 4. Le joueur a une faction mais pas de personnage : On affiche le choix du perso */
+          <CharacterSelection
+            uid={user.uid}
+            onComplete={() => fetchUserData(user.uid)}
+          />
         ) : (
-          /* Le joueur est connecté ET a une faction : On affiche le Fief */
+          /* Le joueur a tout complété : On affiche le Fief */
           <div className='text-center bg-slate-800 border border-slate-700 p-6 rounded-lg max-w-md w-full shadow-xl'>
             <p className='text-xl text-gray-200 mb-2'>
               Salutations, Messire{' '}
